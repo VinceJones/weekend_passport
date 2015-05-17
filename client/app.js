@@ -45,12 +45,29 @@ function deleteUser(dataId){
         }
     });
 }
+function logout() {
+    $.ajax({
+        type: "GET",
+        datatype: "application/json",
+        url: "/users/logout",
+        success: function(response) {
+            console.log("Logged out");
+            location.reload();
+        },
+        error: function(err) {
+            console.log("No Logout for you! ", err);
+        },
+        complete: function() {
+            console.log("Logout function done");
+        }
+    });
+}
 
 $(document).ready(function() {
     getData();
 
     $('.logout').on('click', function() {
-
+        logout();
     })
     $(".displayUsers").on('click', '.removeData', function() {
         var user = $(this).data('id');

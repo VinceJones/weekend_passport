@@ -46,4 +46,10 @@ router.delete('/:id', function(req, res, next) {
     }
 });
 
+/* GET Logout */
+router.get('/logout', function(req, res, next) {
+    req.logout();
+    res.redirect('../../');
+});
+
 module.exports = router;

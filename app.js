@@ -6,18 +6,18 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var passport = require('passport');
-var session = require('express-session');
 var localStrategy = require('passport-local').Strategy;
+var mongoose = require('mongoose');
+var session = require('express-session');
 var User = require('./models/user');
-var register = require('./routes/register');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var register = require('./routes/register');
 
 var app = express();
 
 // Mongo setup
-var mongoose = require('mongoose');
 
 var mongoURI = "mongodb://localhost:27017/weekend_passport";
 var MongoDB = mongoose.connect(mongoURI).connection;
@@ -40,11 +40,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Passport Stuff
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(session({
     secret: 'secret',
     key: 'user',
@@ -52,6 +47,12 @@ app.use(session({
     saveUninitialized: false,
     cookie: { maxAge: 60000, secure: false }
 }));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Passport Stuff
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
@@ -69,17 +70,23 @@ passport.use('local', new localStrategy({
         usernameField: 'username'
     },
     function(req, username, password, done){
+        console.log("finding user...");
         User.findOne({ username: username }, function(err, user) {
             if (err) throw err;
-            if (!user)
-                return done(null, false, {message: 'Incorrect username and password.'});
+            if (!user) {
+                console.log("User doesn't exist");
+                return done(null, false, {message: 'Incorrect username and password.'});}
 
             // test a matching password
+            console.log("testing for username "+ username + " password: "+ password);
             user.comparePassword(password, function(err, isMatch) {
                 if (err) throw err;
-                if(isMatch)
+                if(isMatch) {
+                    console.log("Password matches for " + user.username + " isMatch " + isMatch);
                     return done(null, user);
+                    }
                 else
+                    console.log("Password doesn't match");
                     done(null, false, { message: 'Incorrect username and password.' });
             });
         });

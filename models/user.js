@@ -5,7 +5,9 @@ var mongoose = require('mongoose'),
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    name: {first: String, last: String},
+    email: String
 });
 
 UserSchema.pre('save', function(next) {
@@ -35,5 +37,6 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
         cb(null, isMatch);
     });
 };
+
 
 module.exports = mongoose.model('User', UserSchema);

@@ -13,11 +13,34 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/searchUsers', function(req, res, next){
-    if (req.isAuthenticated()) {
-        Users.find({}, "username", function(err, Users){
-            res.json(Users);
-        });
+    if (req.user.username == "batman") {
+        if (req.isAuthenticated()) {
+            Users.find({}, "username name.first name.last email", function (err, Users) {
+                res.json(Users);
+            });
 
+        } else {
+            res.json("You are not Authenticated");
+        }
+    } else {
+        if (req.isAuthenticated()) {
+            Users.find({username: new RegExp(req.user.username, "i")}, "username name.first name.last email", function (err, Users) {
+                res.json(Users);
+            });
+
+        } else {
+            res.json("You are not Authenticated");
+        }
+    }
+});
+
+/* DELETE /assignments/:id */
+router.delete('/:id', function(req, res, next) {
+    if (req.isAuthenticated()) {
+        Users.findByIdAndRemove(req.params.id, req.body, function (err, Users) {
+            if (err) return next(err);
+            res.json({username: Users.username, firstname: Users.name.first, lastname: Users.name.last,email: Users.email}+"\n was deleted by " + req.user.username);
+        });
     } else {
         res.json("You are not Authenticated");
     }
